@@ -12,11 +12,13 @@ import { EmptyTodos } from '../../ui/EmptyTodos';
 import { CreateTodoButton } from '../../ui/CreateTodoButton';
 // import { Modal } from '../../ui/Modal';
 import { ChangeAlert } from '../../ui/ChangeAlert';
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 function HomePage() {
 
+  
   const navigate = useNavigate();
+
   const { state, stateUpdaters } = useTodos();
 
   const {

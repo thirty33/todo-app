@@ -1,7 +1,16 @@
 import React from 'react';
 import { useLocalStorage } from './useLocalStorage';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom'
 
 function useTodos() {
+
+  let [searchParams, setSearchParams] = useSearchParams();
+
+  const wordFromPath = searchParams.getAll('search')[0];
+
+  let location = useLocation();
+  let navigate = useNavigate();
+
   const {
     item: todos,
     saveItem: saveTodos,
@@ -9,7 +18,18 @@ function useTodos() {
     loading,
     error,
   } = useLocalStorage('TODOS_V2', []);
+
   const [searchValue, setSearchValue] = React.useState('');
+
+  React.useEffect(() => {
+    if (searchValue.length > 0) {
+      navigate({
+        pathname: location.pathname,
+        search: `?search=${searchValue}`,
+      })
+    }
+  }, [searchValue])
+
   const [openModal, setOpenModal] = React.useState(false);
 
   const completedTodos = todos.filter(todo => !!todo.completed).length;
@@ -17,8 +37,20 @@ function useTodos() {
 
   let searchedTodos = [];
 
-  if (!searchValue.length >= 1) {
-    searchedTodos = todos;
+  if (!searchValue.length >= 1) { 
+
+    if(wordFromPath) {
+      searchedTodos = todos.filter(todo => {
+        const todoText = todo.text.toLowerCase();
+        const searchText = wordFromPath.toLowerCase();
+        return todoText.includes(searchText);
+      });
+      setSearchValue(wordFromPath)
+    }
+    else {
+      searchedTodos = todos;
+    }
+
   } else {
     searchedTodos = todos.filter(todo => {
       const todoText = todo.text.toLowerCase();
@@ -61,7 +93,7 @@ function useTodos() {
   };
 
   const getTodo = (id) => todos[todos.findIndex(todo => todo.id === id)]
-  
+
   const state = {
     loading,
     error,
@@ -72,7 +104,7 @@ function useTodos() {
     openModal,
     getTodo
   };
-  
+
   const stateUpdaters = {
     setSearchValue,
     addTodo,
@@ -88,7 +120,7 @@ function useTodos() {
 
 const newTodoId = (todoList) => {
 
-  if(todoList.length < 1) {
+  if (todoList.length < 1) {
     return 1;
   }
 
